@@ -9,10 +9,12 @@ use SSH qw(OpenSSHPipe);
 use OpenStack::Nova qw(get_instances start_server stop_server);
 #VerifyAuthentication();
 
-my $host = "192.168.1.194";
+my $host = "192.168.76.1";
 my $ssh = SSH::OpenSSHPipe($host);
 
-OpenStack::Nova::get_instances($ssh);
+my $instances = OpenStack::Nova::get_instances($ssh);
+#OpenStack::Nova::start_server($ssh, $instances, "MY-SECOND-VM");
+OpenStack::Nova::stop_server($ssh, $instances, "MY-SECOND-VM");
 
 
 exit;

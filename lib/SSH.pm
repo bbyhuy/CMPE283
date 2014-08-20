@@ -41,6 +41,8 @@ sub OpenSSHPipe
     my $ssh = Net::OpenSSH->new($AuthedHost);
     $ssh->error and die "Can't SSH to $host: " . $ssh->error;
 
+    print "\nSSH Pipeline is now open!\n";
+
     return $ssh;
   }
   else{

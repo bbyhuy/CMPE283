@@ -38,7 +38,7 @@ sub ExecuteCommand
 
   #make sure we source keystonerc_admin with the command
   my $sourcedcmd = "source /root/keystonerc_admin && $command";
-
+  print "Executing $sourcedcmd\n";
   #capture ssh output and store to data array and return it.
   my @data = $ssh->capture($sourcedcmd);
   return(\@data);
@@ -85,7 +85,7 @@ sub get_instances
       push (@$instances, dclone($metahash));
     }
   }
-  print Dumper $instances;
+  #print Dumper $instances;
   return $instances;
 }
 
@@ -108,7 +108,22 @@ sub start_server
 
   #executes nova start command
   my $output = ExecuteCommand($ssh, "nova start $server");
-  
+  my $timeout = 5;
+  print "Starting $server instance...";
+  while ($timeout > 0)
+  {
+    if(show_server($ssh, $instances, $server, "ACTIVE"))
+    {
+      print "$server started successfully..";
+      last;
+    }
+    else
+    {
+      print ".";
+      sleep 5;
+      $timeout--;
+    }
+  }
 }
 
 sub stop_server
@@ -130,7 +145,41 @@ sub stop_server
 
   #executes nova stop command
   my $output = ExecuteCommand($ssh, "nova stop $server");
-  
+  my $timeout = 5;
+  print "Stopping $server instance...";
+  while ($timeout > 0)
+  {
+    if(show_server($ssh, $instances, $server, "SHUTOFF"))
+    {
+      print "$server stopped successfully..";
+      last;
+    }
+    else
+    {
+      print ".";
+      sleep 5;
+      $timeout--;
+    }
+  }
+
+}
+
+sub show_server
+{
+  my $ssh = shift;
+  my $instances = shift;
+  my $server = shift;
+  my $togrep = shift;
+
+  #executes nova stop command
+  my $output = ExecuteCommand($ssh, "nova show $server");
+  #print Dumper $output;
+  if(grep /$togrep/, @$output){
+    return 1;
+  }
+  else{
+    return 0;
+  }
 }
 
 
